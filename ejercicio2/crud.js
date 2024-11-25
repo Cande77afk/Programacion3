@@ -55,11 +55,18 @@ app.get('/api/items', async (req, res) => {
     res.json(items);
   });  
 
+  app.get('/api/itemscaros', async (req, res) => {
+    var items = await Item.find({price: { $gte: 2000 } }).exec();
+      res.json(items);
+    });  
+
   app.get('/api/items/:id', async (req, res) => {
     const itemId = req.params.id;
     var item = await Item.find({'_id':itemId});
-      res.json(item);
-    });  
+    res.json(item);
+  });  
+
+    
    
 app.post('/api/items', async (req, res) => {
 
@@ -100,8 +107,30 @@ app.put('/api/items/:id', async (req, res) => {
       return res.status(404).json({'error': error});
     }
       return res.json(doc);
+  }); 
   
-  });  
+  app.put('/api/items/aumentar/:id', async (req, res) => {
+    const itemId = req.params.id;
+    let doc;
+   /*  const item = await Item.findById(itemId);
+      if (!item) {
+        return res.status(404).json({ "error": 'Ítem no encontrado' });
+      } */
+        var item = await Item.find({'_id':itemId});
+        console.log(item);
+        item = item[0];
+        item.price = item.price + item.price * 0.10;
+        console.log(item);
+
+
+    try {
+      doc = await Item.findOneAndUpdate({'_id':itemId},{price: item.price});
+
+    } catch (error) {
+      return res.status(404).json({'error': error});
+    }
+      return res.json(doc);
+  });
   app.delete('/api/items/:id', async (req, res) => {
     const itemId = req.params.id;
     let response;
@@ -115,7 +144,7 @@ app.put('/api/items/:id', async (req, res) => {
   });  
 
 // Configurar el puerto en el que va a escuchar el servidor
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
